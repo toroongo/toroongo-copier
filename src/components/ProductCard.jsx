@@ -25,14 +25,6 @@ const ProductCard = ({ product, viewMode, onClick, onQuickCopy }) => {
         onKeyDown={(event) => event.key === 'Enter' && onClick(product)}
         className={isList ? 'flex flex-row flex-1 cursor-pointer' : 'flex flex-col flex-1 cursor-pointer'}
       >
-        <div className={isList ? 'h-28 w-28 shrink-0 bg-surface md:h-auto md:w-64' : 'aspect-[4/3] w-full shrink-0 bg-surface'}>
-          {product.image ? (
-            <img src={product.image} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/25 text-5xl">📦</div>
-          )}
-        </div>
-
         <div className="flex flex-1 flex-col p-3 md:p-4">
           <div className="mb-2 flex items-start justify-between gap-3">
             <h3 className="line-clamp-2 text-base font-semibold md:text-lg">{product.name}</h3>
