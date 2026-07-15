@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import { ClipboardList, Grid3X3, LayoutList } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Grid3X3, LayoutList, Search } from 'lucide-react';
 import SearchBar from './components/SearchBar';
 import ProductCard from './components/ProductCard';
 import ProductDetailModal from './components/ProductDetailModal';
@@ -22,6 +22,7 @@ function App() {
   const [sortBy, setSortBy] = useState('name-asc');
   const [viewMode, setViewMode] = useState('grid');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const categories = useMemo(() => {
     const categorySet = new Set(products.map((product) => product.category));
@@ -68,6 +69,11 @@ function App() {
     setSearchQuery('');
     setSelectedCategory('All');
     setSortBy('name-asc');
+  };
+
+  const closeMobileSearch = () => {
+    setMobileSearchOpen(false);
+    setSearchQuery('');
   };
 
   const handleCopyOrderInstructions = async () => {
@@ -126,18 +132,107 @@ function App() {
       />
 
       <header className="sticky top-0 z-40 border-b border-primary/10 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl justify-center px-4 py-4 md:py-5">
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 md:gap-4 md:py-4">
+          {/* Mobile: icon-only search that expands to fill the row, YouTube-style */}
+          {mobileSearchOpen ? (
+            <div className="flex w-full items-center gap-2 md:hidden">
+              <button
+                type="button"
+                onClick={closeMobileSearch}
+                aria-label="Close search"
+                className="shrink-0 rounded-lg p-2 text-secondary transition hover:bg-primary/10"
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <div className="relative min-w-0 flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary/45" size={18} />
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Search products, pricing, or script text..."
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  className="w-full rounded-xl border border-primary/20 bg-white py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex w-full items-center gap-2 md:hidden">
+              <img
+                src="/logo_colourful.png"
+                alt="Torongoo"
+                className="h-7 w-auto shrink-0 object-contain"
+              />
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMobileSearchOpen(true)}
+                  aria-label="Open search"
+                  className="rounded-lg border border-primary/20 p-2 text-secondary transition hover:bg-primary/10"
+                >
+                  <Search size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyOrderInstructions}
+                  aria-label="Order instructions"
+                  className="rounded-lg border border-primary/20 p-2 text-secondary transition hover:bg-primary/10"
+                >
+                  <ClipboardList size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode((prev) => (prev === 'grid' ? 'list' : 'grid'))}
+                  className="rounded-lg border border-primary/20 p-2 text-secondary transition hover:bg-primary/10"
+                  aria-label={viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'}
+                >
+                  {viewMode === 'grid' ? <LayoutList size={18} /> : <Grid3X3 size={18} />}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Desktop: logo + inline search + actions, always visible */}
           <img
             src="/logo_colourful.png"
             alt="Torongoo"
-            className="h-11 w-auto max-w-[220px] object-contain md:h-14 md:max-w-[300px]"
+            className="hidden h-11 w-auto shrink-0 object-contain md:block"
           />
+
+          <div className="relative hidden min-w-0 flex-1 md:block">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary/45" size={20} />
+            <input
+              type="text"
+              placeholder="Search products, pricing, or script text..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="w-full rounded-xl border border-primary/20 bg-white py-2.5 pl-12 pr-4 text-base outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
+            />
+          </div>
+
+          <div className="hidden shrink-0 items-center gap-2 md:flex">
+            <button
+              type="button"
+              onClick={handleCopyOrderInstructions}
+              className="inline-flex items-center gap-2 rounded-lg border border-primary/20 px-3 py-2 text-sm font-medium text-secondary transition hover:bg-primary/10"
+              aria-label="Order instructions"
+            >
+              <ClipboardList size={16} />
+              <span>Order instructions</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode((prev) => (prev === 'grid' ? 'list' : 'grid'))}
+              className="rounded-lg border border-primary/20 p-2 text-secondary transition hover:bg-primary/10"
+              aria-label={viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'}
+            >
+              {viewMode === 'grid' ? <LayoutList size={18} /> : <Grid3X3 size={18} />}
+            </button>
+          </div>
         </div>
       </header>
 
       <SearchBar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         categories={categories}
@@ -147,43 +242,9 @@ function App() {
       />
 
       <main className="mx-auto max-w-7xl px-4 py-6 md:py-8">
-        <div className="mb-5 flex items-center justify-between gap-2 rounded-2xl border border-primary/15 bg-white/90 p-3 shadow-soft backdrop-blur md:p-4">
-          <p className="text-sm text-secondary/80 md:text-base">
-            Showing <span className="font-semibold text-primary">{filteredProducts.length}</span> of {products.length} products
-          </p>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleCopyOrderInstructions}
-              className="inline-flex items-center gap-2 rounded-lg border border-primary/20 px-2 py-2 text-sm font-medium text-secondary transition hover:bg-primary/10 sm:px-3"
-              aria-label="Order instructions"
-            >
-              <ClipboardList size={16} />
-              <span className="hidden sm:inline">Order instructions</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('grid')}
-              className={`rounded-lg p-2 transition ${
-                viewMode === 'grid' ? 'bg-primary text-white' : 'bg-surface text-secondary hover:bg-primary/10'
-              }`}
-              aria-label="Grid view"
-            >
-              <Grid3X3 size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('list')}
-              className={`rounded-lg p-2 transition ${
-                viewMode === 'list' ? 'bg-primary text-white' : 'bg-surface text-secondary hover:bg-primary/10'
-              }`}
-              aria-label="List view"
-            >
-              <LayoutList size={18} />
-            </button>
-          </div>
-        </div>
+        <p className="mb-4 text-sm text-secondary/70 md:text-base">
+          Showing <span className="font-semibold text-primary">{filteredProducts.length}</span> of {products.length} products
+        </p>
 
         {filteredProducts.length > 0 ? (
           <div className={viewMode === 'grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6' : 'space-y-4'}>
