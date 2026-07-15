@@ -1,14 +1,17 @@
 # Torongoo Customer Support Hub (CSH)
 
-A modern React workspace for support agents to search products, open prebuilt replies, and copy responses quickly.
+A modern React workspace for support agents to search products, open prebuilt Bengali reply scripts, and copy responses quickly.
 
 ## Features
 
-- CSV-powered product source (`wc-product-export-31-3-2026-1774959409005.csv`)
-- Modern card/list view with product images and stock status
-- Global search across product name, category, prices, and script content
-- Category chips, sorting controls, and clear filters
-- Quick-copy on cards and copy-all from the product modal
+- Product catalog maintained in `src/data/products.js` (name, category, price, stock, variant count, and a set of ready-to-copy support scripts per product)
+- Grid/list product views with category badge, price, variant count, and stock status
+- Global search across product name, category, price, and script content
+- Mobile-first toolbar: category and sort collapse into compact dropdowns with an icon-only reset button on small screens, expanding to pill filters and labeled controls on desktop
+- Per-product support scripts: price & availability, greeting, direct product link, description, key features (where applicable), usage tips, delivery info, and related products
+- Quick Copy on each card assembles a full one-click summary (description, features, price, variant status, stock, and product link) for pasting straight to a customer
+- Copy-all and per-script copy from the product detail modal
+- One-click "Order instructions" button in the toolbar — copies the current website checkout flow to clipboard, since all orders are placed on-site rather than manually through chat
 - Responsive design for desktop and mobile support workflows
 
 ## Tech Stack
@@ -33,11 +36,12 @@ npm run build
 
 ## Data source
 
-Product data is generated at runtime from `wc-product-export-31-3-2026-1774959409005.csv` in `src/data/products.js`.
+Product data lives directly in `src/data/products.js` as a hand-maintained array — there is no build-time CSV import. Update prices, add/remove products, or edit script text by editing that file directly.
 
-- `simple` and `variable` records become product cards
-- `variation` rows are merged into parent products for option/price ranges
-- Support scripts are auto-generated from CSV descriptions
+Each product entry has:
+
+- `id`, `name`, `category`, `price`, `stock`, `variationCount`
+- `scripts`: an array of `{ question, answer }` pairs shown in the product detail modal and used to build the Quick Copy summary
 
 ## Brand theme
 
