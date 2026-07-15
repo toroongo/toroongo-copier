@@ -1,10 +1,20 @@
 import React, { useMemo, useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import { Grid3X3, LayoutList } from 'lucide-react';
+import { ClipboardList, Grid3X3, LayoutList } from 'lucide-react';
 import SearchBar from './components/SearchBar';
 import ProductCard from './components/ProductCard';
 import ProductDetailModal from './components/ProductDetailModal';
 import { products } from './data/products';
+
+const ORDER_INSTRUCTIONS = `এখন থেকে আমরা সব অর্ডার সরাসরি ওয়েবসাইট থেকেই গ্রহণ করছি!
+
+অর্ডার করতে যা করবেন:
+১. পছন্দের প্রোডাক্টের পেজে যান।
+২. 'Add to Cart' অথবা 'Buy Now' বাটনে ক্লিক করুন।
+৩. চেকআউট পেজে আপনার নাম, ফোন নম্বর এবং সম্পূর্ণ ডেলিভারি ঠিকানা দিন।
+৪. অর্ডার কনফার্ম করুন — ব্যস, হয়ে গেল!
+
+ওয়েবসাইট: https://toroongo.com`;
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,12 +70,43 @@ function App() {
     setSortBy('name-asc');
   };
 
+  const handleCopyOrderInstructions = async () => {
+    try {
+      await navigator.clipboard.writeText(ORDER_INSTRUCTIONS);
+      toast.success('Order instructions copied');
+    } catch (error) {
+      toast.error('Clipboard permission blocked.');
+    }
+  };
+
   const handleQuickCopy = async (product) => {
     if (!product.scripts?.length) return;
 
+    const findAnswer = (question) => product.scripts.find((script) => script.question === question)?.answer;
+
+    const description = findAnswer('প্রোডাক্টের বিবরণ');
+    const features = findAnswer('মূল ফিচার');
+    const link = findAnswer('প্রোডাক্ট লিংক');
+    const variationLine =
+      product.variationCount > 0
+        ? `ভ্যারিয়েশন: ${product.variationCount}টি অপশন উপলব্ধ`
+        : 'ভ্যারিয়েশন: একটি কনফিগারেশন';
+
+    const summary = [
+      product.name,
+      description,
+      features ? `মূল ফিচার: ${features}` : null,
+      `মূল্য: ${product.price}`,
+      variationLine,
+      `স্টক: ${product.stock}`,
+      link,
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+
     try {
-      await navigator.clipboard.writeText(product.scripts[0].answer);
-      toast.success(`Copied quick reply for ${product.name}`);
+      await navigator.clipboard.writeText(summary);
+      toast.success(`Copied full summary for ${product.name}`);
     } catch (error) {
       toast.error('Clipboard permission blocked. Please copy from details.');
     }
@@ -106,12 +147,21 @@ function App() {
       />
 
       <main className="mx-auto max-w-7xl px-4 py-6 md:py-8">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-white/90 p-4 shadow-soft backdrop-blur">
+        <div className="mb-5 flex items-center justify-between gap-2 rounded-2xl border border-primary/15 bg-white/90 p-3 shadow-soft backdrop-blur md:p-4">
           <p className="text-sm text-secondary/80 md:text-base">
             Showing <span className="font-semibold text-primary">{filteredProducts.length}</span> of {products.length} products
           </p>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleCopyOrderInstructions}
+              className="inline-flex items-center gap-2 rounded-lg border border-primary/20 px-2 py-2 text-sm font-medium text-secondary transition hover:bg-primary/10 sm:px-3"
+              aria-label="Order instructions"
+            >
+              <ClipboardList size={16} />
+              <span className="hidden sm:inline">Order instructions</span>
+            </button>
             <button
               type="button"
               onClick={() => setViewMode('grid')}
